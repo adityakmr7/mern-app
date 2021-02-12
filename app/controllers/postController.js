@@ -38,7 +38,7 @@ exports.getPostById = async (req, res, next) => {
 };
 exports.updatePost = async(req, res, next) => {
   const postId = req.params.postId;
-  const { title, content, imageUrl } = req.body;
+  const { title, content } = req.body;
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const error = new Error("Validation data Failed");
@@ -52,7 +52,7 @@ exports.updatePost = async(req, res, next) => {
       error.statusCode = 404;
       throw error;
     }
-
+    const imageUrl = req.file.path;
     post.title = title;
     post.content = content;
     post.imageUrl = imageUrl;
@@ -96,13 +96,15 @@ exports.deletePost = async (req, res, next) => {
 }
 
 exports.createPost = async (req, res, next) => {
-  const { title, content, imageUrl } = req.body;
+  const { title, content} = req.body;
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     const error = new Error("Validation data Failed");
     error.statusCode = 422;
     throw error;
   }
+  const imageUrl = req.file.path;
+  console.log(imageUrl);
   try {
     const post = new Post({
       title,

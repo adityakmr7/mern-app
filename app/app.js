@@ -5,6 +5,7 @@ const multer = require('multer');
 const {v4: uuidv4} = require('uuid');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
+const userRouter = require('./routes/authRoutes');
 const path = require('path')
 const app = express();
 
@@ -36,7 +37,9 @@ const fileFilter = (req,file, cb) => {
 
 app.use(multer({storage: fileStorage, fileFilter: fileFilter}).single("image"))
 // localhost:8080/post/
-app.use('/post', postRouter)
+app.use('/post', postRouter);
+// localhost:8080/auth/
+app.use('/auth', userRouter);
 // CORs
 app.use((req,res,next) => {
     res.setHeader("Access-Control-Allow-Origin", "*");

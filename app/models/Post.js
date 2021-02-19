@@ -14,9 +14,14 @@ const postSchema = new Schema({
     },
     imageUrl: {
         type:String,
+    },
+    creator: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: true
     }
 }, {
-    timestamp: true,
+    timestamps: true,
 });
 
 

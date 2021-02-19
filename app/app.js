@@ -51,7 +51,7 @@ app.use((req,res,next) => {
     next();
 })
 
-mongoose.connect(url, {useNewUrlParser: true, useUnifiedTopology: true}).then((_) => {
+mongoose.connect(url, {useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify:true}).then((_) => {
     const PORT = process.env.PORT || 8080;
     app.listen(PORT, () => {
         console.log(`App is running at ${PORT}`)

@@ -1,9 +1,13 @@
 const Post = require("../models/Post");
 const { body, validationResult } = require("express-validator");
+const User = require("../models/User");
+const fs = require('fs');
+const path = require('path');
+
 exports.getAllPost = async (req, res, next) => {
   try {
     // const totalItem = await Post.find().countDocument()
-    const post = await Post.find();
+    const post = await Post.find().populate('creator');
     res.status(200).json({
       // total: totalItem,
       post,
@@ -24,11 +28,18 @@ exports.getPostById = async (req, res, next) => {
       const error = new Error("Post Not Found");
       error.statusCode = 400;
       throw error;
-    } else {
+    } 
+
+    if(post.creator.toString() !== req.userId) {
+      const error = new Error('UnAuthorized');
+      error.statusCode = 403;
+      throw error;
+    }
+
       res.status(200).json({
         post,
       });
-    }
+    
   } catch (err) {
     if (!err.statusCode) {
       err.statusCode = 500;
@@ -36,6 +47,14 @@ exports.getPostById = async (req, res, next) => {
     next(err);
   }
 };
+
+
+const removeImage  = (filePath) => {
+  filePath = path.join(__dirname, '../../', filePath);
+  console.log('filePath', filePath);
+  fs.unlinkSync(filePath, (err) => console.log('filePathError', err))
+}
+
 exports.updatePost = async(req, res, next) => {
   const postId = req.params.postId;
   const { title, content } = req.body;
@@ -52,7 +71,18 @@ exports.updatePost = async(req, res, next) => {
       error.statusCode = 404;
       throw error;
     }
+
+    if(post.creator.toString() !== req.userId) {
+      const error = new Error('UnAuthorized');
+      error.statusCode = 403;
+      throw error;
+    } 
+
     const imageUrl = req.file.path;
+    if(imageUrl !== post.imageUrl) {
+      removeImage(post.imageUrl);
+    }
+
     post.title = title;
     post.content = content;
     post.imageUrl = imageUrl;
@@ -69,10 +99,10 @@ exports.updatePost = async(req, res, next) => {
     }
     next(err);
   }
-
 }
+
+
 exports.deletePost = async (req, res, next) => {
-  
   const postId  = req.params.postId;
   try{
     const post = await Post.findById(postId);
@@ -81,8 +111,19 @@ exports.deletePost = async (req, res, next) => {
       error.statusCode = 400;
       throw error;
     }
-   
+    
+    if(post.creator.toString() !== req.userId) {
+      const error = new Error('UnAuthorized');
+      error.statusCode = 403;
+      throw error;
+    }
+
+     removeImage(post.imageUrl);
      await Post.findByIdAndRemove(postId);
+     const user = await User.findById(req.userId);
+    await user.posts.pull(postId);
+    await user.save();
+
    res.status(200).json({
      message: 'Post Deleted',
    })  
@@ -103,19 +144,31 @@ exports.createPost = async (req, res, next) => {
     error.statusCode = 422;
     throw error;
   }
+  if(!req.file) {
+    const error = new Error('No Image Added');
+    error.statusCode(422)
+    throw error;
+  }
   const imageUrl = req.file.path;
-  console.log(imageUrl);
+
   try {
     const post = new Post({
       title,
       content,
       imageUrl,
+      creator: req.userId
     });
     const result = await post.save();
+    const creator = await User.findById(req.userId);
+    creator.posts.push(result);
+    creator.save();
     if (result) {
       res.status(200).json({
         message: "Post Created!",
         post: result,
+        creator : {
+          _id: creator._id,name: creator.name
+        }
       });
     }
   } catch (err) {

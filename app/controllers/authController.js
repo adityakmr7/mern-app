@@ -55,7 +55,7 @@ exports.login = async (req, res, next) => {
         email: user.email,
         userId: user._id.toString(),
       },
-      "supersecretpassword",
+      process.env.SECRET,
       { expiresIn: "1h" }
     );
     res.status(200).json({

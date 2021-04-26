@@ -13,7 +13,7 @@ dotenv.config();
 
 const password = process.env.DATABASE_PWD
 const username = process.env.DATABASE_USER 
-const url = `mongodb+srv://${username}:${password}@mern-stack.cwato.mongodb.net/mern-app?retryWrites=true&w=majority`;
+const url = `mongodb+srv://${username}:${password}@cluster0.cwato.mongodb.net/mern-app?retryWrites=true&w=majority`;
 
 app.use(bodyParser.json())
 

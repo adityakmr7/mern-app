@@ -6,10 +6,8 @@ const path = require('path');
 
 exports.getAllPost = async (req, res, next) => {
   try {
-    // const totalItem = await Post.find().countDocument()
     const post = await Post.find().populate('creator');
     res.status(200).json({
-      // total: totalItem,
       post,
     });
   } catch (err) {

@@ -1,0 +1,7 @@
+{
+  "env": {
+    "DB_PWD": "iiKehiDUBCPRZlhS",
+    "DB_USER": "aditya",
+    "SECRET": "SUPERSECRETPASSWORD"
+  }
+}
